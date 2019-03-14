@@ -18,7 +18,7 @@ This is the main repository for our COE 356 project.
     </tr><tr>
       <td>Quansah Anthony Kwame Jacklingo</td> <td></td> <td>Backend Support</td>
     </tr><tr>
-      <td>Rhozzay</td> <td></td> <td>Requriements</td>
+      <td>Adu Akoh Ernest</td> <td>5945216</td> <td>Chief Analyst</td>
     </tr>
   </table>
 </p>

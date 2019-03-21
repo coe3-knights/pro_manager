@@ -8,11 +8,11 @@ db = SQLAlchemy()
 migrate = Migrate()
 
 def create_app(config_class=Config):
-	app = FlasK(__name__)
+	app = Flask(__name__)
 	app.config.from_object(config_class)
 
 	db.init_app(app)
-	mifǵrate.init_app(app, db)
+	migrate.init_app(app, db)
 	
 
 from app import models

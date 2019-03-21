@@ -14,7 +14,7 @@ This is the main repository for our COE 356 project.
     </tr><tr>
       <td>Boakye Britwum Blessed</td> <td>5949416</td> <td>Backend Lead</td>
     </tr><tr>
-      <td>Kreiger Godwin</td> <td></td> <td>Backend Lead</td>
+      <td>Kreiger Godwin</td> <td></td> <td>Backend Support</td>
     </tr><tr>
       <td>Quansah Anthony Kwame Jacklingo</td> <td></td> <td>Backend Support</td>
     </tr><tr>

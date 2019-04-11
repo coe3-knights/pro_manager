@@ -22,7 +22,7 @@ client/npm-debug.log*
 client/yarn-debug.log*
 client/yarn-error.log*
 
-__pychache__
+__pycache__
 
 venv
 .vscode

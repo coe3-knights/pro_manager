@@ -16,7 +16,9 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     login.init_app(app)
 
-    #import blueprints here
+    #import and register blueprints here
+    from app.api import bp as api
+    app.register_blueprint(api)
 
     return app
 

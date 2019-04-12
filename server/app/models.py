@@ -35,10 +35,9 @@ class TokenMixin(object):
         self.token_expiration_date = datetime.utcnow() - timedelta(seconds=1)
 
     @staticmethod
-    def check_token(token):
-        user = Lecturer.query.filter_by(token=token).first() or Student.query.filter_by(
-            token=token).first()
-        if user is None or user.token_expiration < datetime.utcnow():
+    def checkToken(token):
+        user = Lecturer.query.filter_by(token=token).first() or Student.query.filter_by(token=token).first()
+        if user is None or user.token_expiration_date < datetime.utcnow():
             return None
         return user
 
@@ -73,6 +72,7 @@ class User(UserMixin, object):
 
     def toDict(self, inc_email=False):
         data = {
+            'id': self.id,
             'username': self.username,
             'firstname': self.firstname,
             'lastname': self.lastname,
@@ -97,7 +97,7 @@ class Lecturer(User, UserMixin, TokenMixin, db.Model):
 
     def lecturerToDict(self, include_email=False):
         data = self.toDict(include_email)
-        data['projects'] = self.projects.count()
+        data['projects_count'] = self.projects.count()
         return data
 
 class Student(User, UserMixin, TokenMixin, db.Model):
@@ -106,7 +106,11 @@ class Student(User, UserMixin, TokenMixin, db.Model):
 
     def studentToDict(self, include_email=False):
         data = self.toDict(include_email)
-        data['projects'] = self.projects.count()
+        data['projects_count'] = self.projects.count()
+
+'''Remember to include a projects_list part in the *ToDict functions after defining 
+ a toDict function to handle projects. The list should be a dict of all projects submitted or supervised by a user.
+'''
 
 @login.user_loader
 def load_user(id):

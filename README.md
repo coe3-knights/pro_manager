@@ -48,5 +48,8 @@ Please follow these steps to set-up your system for this project.
 
 6. Install all the dependecies listed in the requirements.txt file. Run
     #### `pip install -r reqiurements.txt`
+    
+7. Create the sqlite db file by running 
+    #### `flask db upgrade
 
-7. Open the project folder in your favorite editor and have fun coding. 
+8. Open the project folder in your favorite editor and have fun coding.

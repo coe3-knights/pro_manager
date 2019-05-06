@@ -50,6 +50,6 @@ Please follow these steps to set-up your system for this project.
     #### `pip install -r reqiurements.txt`
     
 7. Create the sqlite db file by running 
-    #### `flask db upgrade
+    #### `flask db upgrade`
 
 8. Open the project folder in your favorite editor and have fun coding.

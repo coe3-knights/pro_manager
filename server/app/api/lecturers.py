@@ -15,10 +15,10 @@ from app.api.errors import badRequest
 '''The view function below returns lecturer information on the current user(that is 
  why True is passed to the lectToDict method). Though they have similar technicalities, I have not explicitly handled the data that will be sent when a client request information on a different user. This is because, that functionality has not been set to be included in our product.
 '''
-@bp.route('/lecturer/<int:id>', methods=['GET'])
+@bp.route('/lecturer/<string:username>', methods=['GET'])
 @token_auth.login_required
-def getUser(id):
-    return jsonify(Lecturer.query.get_or_404(id).lecturerToDict(True))
+def getUser(username):
+    return jsonify(Lecturer.query.get_or_404(username).lecturerToDict(True))
     #True is passed to include email in response
 
 
@@ -45,10 +45,10 @@ def createUser():
     return response
 
 #This view function is self explanatory right? ;)
-@bp.route('/lecturer/<int:id>', methods=['PUT'])
+@bp.route('/lecturer/<string:username>', methods=['PUT'])
 @token_auth.login_required
-def updateUser(id):
-    lecturer = Lecturer.query.get_or_404(id)
+def updateUser(username):
+    lecturer = Lecturer.query.get_or_404(username)
     data = request.get_json() or {}
     if 'username' in data and data['username'] != lecturer.username and Lecturer.query.filter_by(username=data['username']).first():
         return badRequest('please use a different username')

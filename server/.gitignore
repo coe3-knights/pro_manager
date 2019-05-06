@@ -4,3 +4,4 @@ venv
 .vscode
 app.db
 logs
+todo.txt

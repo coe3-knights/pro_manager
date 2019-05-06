@@ -1,6 +1,7 @@
 import base64
 from datetime import datetime, timedelta
-from hashlib import md5
+#from hashlib import md5
+# i'm using the md5 for generating a unique identity for the avatars
 import os, json, jwt
 from time import time
 from flask import current_app, url_for
@@ -45,14 +46,14 @@ class User(UserMixin, object):
     id = db.Column(db.Integer, primary_key=True)
     firstname = db.Column(db.String(32))
     lastname = db.Column(db.String(32))
-    username = db.Column(db.String(64), index=True, unique=True)
+    username = db.Column(db.String(64), index=True, unique=True, nullable=False)
     institution = db.Column(db.String(64))
     department = db.Column(db.String(64))
-    email = db.Column(db.String(128), index=True, unique=True)
+    email = db.Column(db.String(128), index=True, unique=True, nullable=False)
     pwhash = db.Column(db.String(128))
 
     def __repr__(self):
-        return '<{}>'.format(self.firstname)
+        return '<user:{} name:{} {}>'.format(self.username, self.firstname, self.lastname)
 
     def setPassword(self, password):
         self.pwhash = generate_password_hash(password)
@@ -60,15 +61,15 @@ class User(UserMixin, object):
     def checkPassword(self, password):
         return check_password_hash(self.pwhash, password)
 
-    ''' This function retrieves an avatar for users using their emails. These 
-    avatars will be used as user profile pictures. It has been redacted for now,
-    pending approval from group members.
-
-    def avatar(self, size):
-        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
-        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
-            digest, size)    
-    '''
+    # This function retrieves an avatar for users using their emails. These 
+    # avatars will be used as user profile pictures. It has been redacted for now,
+    # pending approval from group members.
+    #
+    # def avatar(self, size):
+    #     digest = md5(self.email.lower().encode('utf-8')).hexdigest()
+    #     return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
+    #         digest, size)    
+    # 
 
     def toDict(self, inc_email=False):
         data = {
@@ -122,29 +123,77 @@ class Project(db.Model):
     approved = db.Column(db.Boolean, default=False)
     submit_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     publish_date= db.Column(db.DateTime, index=True)
-    file = db.Column(db.LargeBinary)
-    owner = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
-    supervisor = db.Column(db.Integer, db.ForeignKey('lecturer.id'), nullable=False)
+    file_data= db.Column(db.LargeBinary)
+    filename = db.Column(db.String(120), unique=True)
+    owner = db.Column(db.Integer, db.ForeignKey('student.id'))
+    supervisor = db.Column(db.Integer, db.ForeignKey('lecturer.id'))
     requested_approval = db.Column(db.Boolean, default=False)
     approval_req_accepted = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
         return '<{}>'.format(self.title)
     
-    def approve(self):
-        self.approved = True
-        self.publish_date = datetime.utcnow
+    # def approve(self):
+    #     self.approved = True
+    #     self.publish_date = datetime.utcnow
 
-    def requestApproval(self):
-        self.requested_approval = True
-        '''return true
-        remember to uncomment this return statement when implementing logic to
-        ensure an approval request is submitted once'''
+    # def requestApproval(self):
+    #     self.requested_approval = True
+    #     '''return true
+    #     remember to uncomment this return statement when implementing logic to
+    #     ensure an approval request is submitted once'''
     
-    def acceptApprovalRequest(self):
-        self.approval_req_accepted = True
+    # def acceptApprovalRequest(self):
+    #     self.approval_req_accepted = True
 
-    def isPendingApproval(self):
-        if self.requested_approval and not self.approval_req_accepted:
-            return True
-        return False
+    # def isPendingApproval(self):
+    #     if self.requested_approval and not self.approval_req_accepted:
+    #         return True
+    #     return False
+
+    def toDict(self, public=True):
+        data = {
+            'id': self.id,
+            'title': self.title,
+            'date_published': self.publish_date, 
+            'author_id': self.owner,
+            'author': self.author
+        }
+        if not public:
+            data['date_submitted'] = self.submit_date
+            data['supervisor_id'] = self.supervisor
+            data['supervisor'] = self.inspector
+        return data
+
+    # The static method below will pass a specified no. of projects per page into a 
+    # dictionary that will be passed into a json response object for the allowed 
+    # routes. Resturcture the '_links' property to suite the requirements from the 
+    # frontenders.
+    # Nonetheless, I have commented the block out since I was looking at another 
+    # implementation where we leave the pagination to the client-side, thus 
+    # returning anything from the database that matches the query in the response 
+    # object on the very first request
+    #
+    # @staticmethod
+    # def to_collection_dict(query, page, per_page, endpoint, **kwargs):
+    #     resources = query.paginate(page, per_page, False)
+    #     data = {
+    #         'projects': [project.to_dict() for project in resources.projects],
+    #         '_meta': {
+    #             'page': page,
+    #             'per_page': per_page,
+    #             'total_pages': resources.pages,
+    #             'total_items': resources.total
+    #         },
+    #         '_links': {
+    #             'self': url_for(endpoint, page=page, per_page=per_page,
+    #                             **kwargs),
+    #             'next': url_for(endpoint, page=page + 1, per_page=per_page,
+    #                             **kwargs) if resources.has_next else None,
+    #             'prev': url_for(endpoint, page=page - 1, per_page=per_page,
+    #                             **kwargs) if resources.has_prev else None
+    #         }
+    #     }
+    #     return data
+            
+    

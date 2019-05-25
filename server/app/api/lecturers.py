@@ -12,9 +12,9 @@ from app.api.errors import badRequest
 '''
 
 
-'''The view function below returns lecturer information on the current user(that is 
- why True is passed to the lectToDict method). Though they have similar technicalities, I have not explicitly handled the data that will be sent when a client request information on a different user. This is because, that functionality has not been set to be included in our product.
-'''
+# The view function below returns lecturer information on the current user(that is 
+#  why True is passed to the lectToDict method). Though they have similar technicalities, I have not explicitly handled the data that will be sent when a client request information on a different user. This is because, that functionality has not been set to be included in our product.
+
 @bp.route('/lecturer/<string:username>', methods=['GET'])
 @token_auth.login_required
 def getUser(username):
@@ -22,14 +22,14 @@ def getUser(username):
     #True is passed to include email in response
 
 
-''' This createUser view function handles user sign-ups. I have left out rejecting 
- null values for fields other than the ones implemented here, to be done in the frontend design.
-'''
-@bp.route('/lecturer', methods=['POST'])
+#  This createUser view function handles user sign-ups. I have left out rejecting 
+#  null values for fields other than the ones implemented here, to be done in the frontend design.
+
+@bp.route('/lecturer/sign_up', methods=['POST'])
 def createUser():
     data = request.get_json() or {}
     if 'username' not in data or 'email' not in data or 'password' not in data:
-        return badRequest('provide a username, password and email')
+        return badRequest('no username, password or email')
     if Lecturer.query.filter_by(username=data['username']).first():
         return badRequest('username is already taken')
     if Lecturer.query.filter_by(email=data['email']).first():
@@ -45,15 +45,20 @@ def createUser():
     return response
 
 #This view function is self explanatory right? ;)
-@bp.route('/lecturer/<string:username>', methods=['PUT'])
+@bp.route('/lecturer/<string:username>/profile', methods=['PUT','GET'])
 @token_auth.login_required
-def updateUser(username):
-    lecturer = Lecturer.query.get_or_404(username)
-    data = request.get_json() or {}
-    if 'username' in data and data['username'] != lecturer.username and Lecturer.query.filter_by(username=data['username']).first():
-        return badRequest('please use a different username')
-    if 'email' in data and data['email'] != lecturer.email and Lecturer.query.filter_by(email=data['email']).first():
-        return badRequest('please use a different email address')
-    lecturer.fromDict(data)
-    db.session.commit()
-    return jsonify(lecturer.lecturerToDict())
+def updateUser(username, response):
+    if request.method == 'PUT':
+        lecturer = Lecturer.query.get_or_404(username)
+        data = request.get_json() or {}
+        if 'username' in data and data['username'] != lecturer.username and Lecturer.query.filter_by(username=data['username']).first():
+            return badRequest('please use a different username')
+        if 'email' in data and data['email'] != lecturer.email and Lecturer.query.filter_by(email=data['email']).first():
+            return badRequest('please use a different email address')
+        lecturer.fromDict(data)
+        db.session.commit()
+        response.status_code = 201
+        response.headers['Location'] = url_for('api.updateUser', username=lecturer.username)
+    response = jsonify(lecturer.lecturerToDict(True))
+    response.status_code = 200
+    return response

@@ -5,16 +5,22 @@ from app.models import Project
 from app.api import bp
 from app.api.auth import token_auth
 from app.api.errors import badRequest
+from flask_login import current_user
 
 @bp.route('/explore', methods=['GET', 'POST'])
 def explore():
     pass
-
+    
 
 @bp.route('/projects/upload', methods=['POST'])
 @token_auth.login_required
 def upload():
-    pass
+    filename = request.files['file_name']
+    new_project = Project()
+    new_project.title = request.form['title']
+    new_project.owner = current_user.id
+    db.session.add(new_project)
+    db.session.commit()
 
 
 @bp.route('/projects/download/<string:filename>')

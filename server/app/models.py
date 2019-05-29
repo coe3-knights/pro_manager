@@ -7,7 +7,7 @@ from time import time
 from flask import current_app, url_for
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import db, login
+from app import db, login, search
 
 '''Recheck the implementation of the database schema: all relationships in here
 now are one to one. Association table for the relationship between either three
@@ -37,12 +37,13 @@ class TokenMixin(object):
 
     @staticmethod
     def checkToken(token):
-        user = Lecturer.query.filter_by(token=token).first() or Student.query.filter_by(token=token).first()
+        user = User.query.filter_by(token=token).first() 
         if user is None or user.token_expiration_date < datetime.utcnow():
             return None
         return user
 
-class User(UserMixin, object):
+class User(UserMixin, TokenMixin, db.Model):
+    __searchable__ = ['institution', 'department']
     id = db.Column(db.Integer, primary_key=True)
     firstname = db.Column(db.String(32))
     lastname = db.Column(db.String(32))
@@ -51,6 +52,7 @@ class User(UserMixin, object):
     department = db.Column(db.String(64))
     email = db.Column(db.String(128), index=True, unique=True, nullable=False)
     pwhash = db.Column(db.String(128))
+    projects = db.relationship('Project', backref='author', lazy='dynamic')
 
     def __repr__(self):
         return '<user:{} name:{} {}>'.format(self.username, self.firstname, self.lastname)
@@ -80,6 +82,7 @@ class User(UserMixin, object):
             'institution': self.institution,
             'department': self.department,
             #'avatar': self.avatar(128)
+            'project_count': self.projects.count()
         }
         if inc_email:
             data['email'] = self.email
@@ -93,22 +96,22 @@ class User(UserMixin, object):
         if new_user and 'password' in data:
             self.setPassword(data['password'])
 
-class Lecturer(User, UserMixin, TokenMixin, db.Model):
-    projects = db.relationship('Project', backref='inspector', lazy='dynamic')
-    #include columns for lecturer validation
+# class Lecturer(User, UserMixin, TokenMixin, db.Model):
+#     projects = db.relationship('Project', backref='inspector', lazy='dynamic')
+#     #include columns for lecturer validation
 
-    def lecturerToDict(self, include_email=False):
-        data = self.toDict(include_email)
-        data['projects_count'] = self.projects.count()
-        return data
+#     def lecturerToDict(self, include_email=False):
+#         data = self.toDict(include_email)
+#         data['projects_count'] = self.projects.count()
+#         return data
 
-class Student(User, UserMixin, TokenMixin, db.Model):
-    projects = db.relationship('Project', backref='author', lazy='dynamic')
-    #check with frontend guys to see if there are other info particular to students
+# class Student(User, UserMixin, TokenMixin, db.Model):
+#     projects = db.relationship('Project', backref='author', lazy='dynamic')
+#     #check with frontend guys to see if there are other info particular to students
 
-    def studentToDict(self, include_email=False):
-        data = self.toDict(include_email)
-        data['projects_count'] = self.projects.count()
+#     def studentToDict(self, include_email=False):
+#         data = self.toDict(include_email)
+#         data['projects_count'] = self.projects.count()
 
 '''Remember to include a projects_list part in the *ToDict functions after defining 
  a toDict function to handle projects. The list should be a dict of all projects submitted or supervised by a user.
@@ -116,20 +119,24 @@ class Student(User, UserMixin, TokenMixin, db.Model):
 
 @login.user_loader
 def load_user(id):
-    return Lecturer.query.get(int(id)) or Student.query.get(int(id))
+    return User.query.get(int(id))
+    #return Lecturer.query.get(int(id)) or Student.query.get(int(id))
 
 class Project(db.Model):
+    __searchable__ = ['title', 'authors', 'publish_date']
+
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(128), index=True)
-    approved = db.Column(db.Boolean, default=False)
+    authors = db.Column(db.String(250))
+    #approved = db.Column(db.Boolean, default=False)
     submit_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     publish_date= db.Column(db.DateTime, index=True)
     file_data= db.Column(db.LargeBinary)
     filename = db.Column(db.String(120), unique=True)
     owner = db.Column(db.Integer, db.ForeignKey('student.id'))
     supervisor = db.Column(db.Integer, db.ForeignKey('lecturer.id'))
-    requested_approval = db.Column(db.Boolean, default=False)
-    approval_req_accepted = db.Column(db.Boolean, default=False)
+    #requested_approval = db.Column(db.Boolean, default=False)
+    #approval_req_accepted = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
         return '<{}>'.format(self.title)

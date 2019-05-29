@@ -1,6 +1,6 @@
 import base64
 from datetime import datetime, timedelta
-#from hashlib import md5
+from hashlib import md5
 # i'm using the md5 for generating a unique identity for the avatars
 import os, json, jwt
 from time import time
@@ -69,7 +69,7 @@ class User(UserMixin, object):
     #     digest = md5(self.email.lower().encode('utf-8')).hexdigest()
     #     return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
     #         digest, size)    
-    # 
+    
 
     def toDict(self, inc_email=False):
         data = {
@@ -79,13 +79,14 @@ class User(UserMixin, object):
             'lastname': self.lastname,
             'institution': self.institution,
             'department': self.department,
+            #'avatar': self.avatar(128)
         }
         if inc_email:
             data['email'] = self.email
         return data
 
     def fromDict(self, data, new_user=False):
-        for field in ['username', 'email', 'firstname', 'lastname', 'institution',
+        for field in ['username', 'email', 'firstname', 'lastname', 'school',
                 'department']:
             if field in data:
                 setattr(self, field, data[field])
@@ -133,23 +134,30 @@ class Project(db.Model):
     def __repr__(self):
         return '<{}>'.format(self.title)
     
+
+    # Remove these methods from here and implement them appropriately in their respective view modules.
+    #
     # def approve(self):
     #     self.approved = True
     #     self.publish_date = datetime.utcnow
-
+    #
     # def requestApproval(self):
     #     self.requested_approval = True
     #     '''return true
     #     remember to uncomment this return statement when implementing logic to
     #     ensure an approval request is submitted once'''
-    
+    #
     # def acceptApprovalRequest(self):
     #     self.approval_req_accepted = True
-
+    #
     # def isPendingApproval(self):
     #     if self.requested_approval and not self.approval_req_accepted:
     #         return True
     #     return False
+
+    def hashFilename(self, filename):
+        digest = md5(filename.lower().encode('utf-8')).hexdigest()
+        self.filename = digest
 
     def toDict(self, public=True):
         data = {

@@ -1,0 +1,141 @@
+.main_wrapper{
+    width: 100%;
+    height: 86vh;
+    /* border: 1px red solid; */
+    z-index: 999;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.main{
+    z-index: 0;
+    opacity: .2;
+}
+
+.forms_wrapper{
+    position: absolute;
+    width: 25%;
+    height: 70vh;
+    top: 15%;
+    left: 40%;
+    transform: translate(-50%, 10%);
+    display: block;
+    /* border: 1px #000 solid; */
+    align-self: center;
+    background-color: #fff;
+    /* visibility: hidden; */
+    animation: dropDown 1s linear .4s  both ;
+    box-shadow: 0rem 4rem 100rem #000;
+    position: fixed;
+}
+
+@keyframes dropDown{
+    0%{
+        opacity: 0;
+        transform: translateY(-200px)
+    }
+    80%{transform: translateY(60px)}
+    100%{
+        opacity: 1;
+        transform: translateY(0px)
+    }
+}
+
+#signtext{
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    /* border: 1px green solid; */
+
+}
+
+#signtext span{
+    display: flex;
+    margin-bottom: 1rem;
+    justify-content: center;
+}
+
+#text{
+    display: flex;
+    justify-content: center;
+}
+
+.wrap{
+    position: absolute;
+    /* border: 1px yellow solid; */
+    /* height: 40%; */
+}
+
+.log_in{
+    /* border: 1px blue solid; */
+    width: 80%;
+    margin-left: 10%;
+    margin-top: 5%;
+}
+
+.person{
+    position: absolute;
+    left: 85%;
+    top: 4.5rem;
+}
+
+.user_name{
+    margin-top: 2rem;
+}
+
+.user_name,
+.pass_word{
+    width: 100%;
+    margin-bottom:2rem;
+}
+
+.detail{
+    /* border:1px aqua solid; */
+}
+
+#rem{
+    position: absolute;
+    font-size: 1.3rem;
+}
+
+#f_password{
+    position: absolute;
+    font-size: 1.3rem;
+    left: 60%;
+    color: rgba(0, 0, 0, 0.705);
+}
+
+#term{
+   position: absolute;
+   left: 27%;
+   top: 190%;
+   /* border: 1px red solid; */
+   color: rgba(0, 0, 0, 0.616);
+   font-size: 1.4rem;
+   cursor: pointer;
+}
+
+.btn1{
+   position: absolute;
+   height: 5rem;
+   width: 100.5%;
+   top: 33.3rem;
+   left: -.5%;
+   /* border: 1px violet solid; */
+}
+
+.submit_1{
+    position: absolute;
+    height: inherit;
+    width: inherit;
+    top: -.5rem;
+    left: 0rem;
+    font-size: 1.4rem;
+    cursor: pointer;
+}
+
+
+
+
+
+

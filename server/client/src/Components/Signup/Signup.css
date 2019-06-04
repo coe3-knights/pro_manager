@@ -1,0 +1,261 @@
+.wrapper{
+    width: 100%;
+    height: 87vh;
+    background-color: rgba(0, 0, 0, 0.425);
+    /* border: 1px solid #000; */
+} 
+
+.wrapper p{
+    position: absolute;
+    left: 10rem;
+    top: 9rem;
+    font-size: 1.5rem;
+    color: rgba(0, 0, 0, 0.664);
+}
+
+.form-wrapper{
+    position: relative;
+    width: 32vw;
+    height: 80vh;
+    top: -95%;
+    left: 35%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    /* border: 1px solid red; */
+    animation: dropDown 1s linear .4s  both ;
+    box-shadow: 0rem 4rem 100rem #000;
+}
+
+.forms{
+    position: absolute;
+    top: 17vh;
+    left: 3rem;
+    width: 28vw;
+    height: 63vh;
+    /* border: 1px green solid; */
+
+}
+
+input{
+    color: #000;
+    font-size: 1.5rem;
+}
+input::placeholder{
+    font-size: 1.5rem;
+    color: #000;
+
+}
+
+#head{
+    margin-top: 1rem;
+}
+.head{
+    position: absolute;
+    left: 10rem;
+    padding-top: 1rem
+}
+
+.head span{
+    display: flex;
+    justify-content: center
+}
+
+
+
+
+.firstName input{
+    position: absolute;
+    width: 19rem;
+}
+.lastName input{
+    position: absolute;
+    left: 22rem;
+    width: 20rem;
+}
+
+.userName,
+.email,
+.password,
+.School,
+.Department input{
+    position: absolute;
+    width: 42rem;
+    top: 5rem;
+}
+
+.userName input{
+    position: absolute;
+    width: 42rem;
+}
+
+.email input{
+    position: absolute;
+    top: 5rem;
+    width: 42rem;
+}
+
+.password input{
+    position: absolute;
+    top: 10rem;
+    width: 42rem;
+}
+
+.Cpassword input{
+    position: absolute;
+    top: 20rem;
+    width: 42rem;
+}
+
+.School input{
+    position: absolute;
+    top: 20rem;
+    width: 42rem;
+}
+
+.Department input{
+    position: absolute;
+    top: 30rem;
+}
+
+.stat{
+    position: absolute;
+    top: 34rem;
+    left: 0rem;
+}
+
+.stat label{
+    position: absolute;
+    margin-left: 0rem;
+    top: .2rem;
+}
+
+#isLecturer{
+    position: absolute;
+    top: .2rem;
+    left: 12rem;
+}
+
+#l0{
+    position: absolute;
+    top: -0.2rem;
+}
+#l1{
+    position: absolute;
+    left: 14rem;
+    top: .1rem;
+}
+
+.createAccount button{
+    position: absolute;
+    background-color: #000;
+    color: #fff;
+    top: 40.1rem;
+    left: -7.5%;
+    height: 7vh;
+    width: 115%;
+    border: none;
+    cursor: pointer;
+    font-size: 1.4rem;
+}
+
+#acc{
+    position: absolute;
+    top : 33rem;
+    left: 26rem;
+    font-size: 1.3rem;
+    font-weight: 300;
+    cursor: pointer;
+}
+
+#acc:hover{
+    color: #000;
+}
+
+#terms1{
+    position: absolute;
+    top: 38rem;
+    left:14rem;
+    font-weight: 300;
+    font-size: 1.3rem;
+    cursor: pointer;
+}
+
+.error{
+    position: absolute;
+    border:none;
+    border-bottom: 1px solid red;
+}
+
+.errorMessage{
+    color: red;
+    font-size: 0.7em;
+}
+
+.firstName span{
+   position: absolute;
+   top: 2.8rem;
+   left: 0rem;
+}
+
+.lastName span{
+        position: absolute;
+        top: 2.8rem;
+        left: 21.5rem;
+     
+}
+
+.userName span{
+    position: absolute;
+        top: 2.8rem;
+        left: 0rem;
+}
+
+.email span{
+    position: absolute;
+    top: 7.8rem;
+    left: 0rem;
+}
+
+.password span{
+    position: absolute;
+    top: 12.8rem;
+    left: 0rem;
+}
+
+.Cpassword span{
+    position: absolute;
+    top: 23rem; 
+    left: 0rem;
+
+}
+
+.Department{
+    position: absolute;
+    top: 30rem;
+}
+
+.School{
+    position: absolute;
+    top: 25rem;
+}
+.School select{
+    border: none;
+    outline: none;
+    font-size: 1.5rem;
+    background-color: transparent;
+    color: rgba(0, 0, 0, 0.644);
+    border-bottom: 1px solid #3381b893;
+    width: 42rem;
+    transition: all .4s;
+    padding-left: 1rem;
+}
+.Department select{
+    border: none;
+    font-size: 1.5rem;
+    background-color: transparent;
+    color: rgba(0, 0, 0, 0.637);
+    border-bottom: 1px solid #3381b893;
+    width: 42rem;
+    padding-left: 1rem;
+}
+

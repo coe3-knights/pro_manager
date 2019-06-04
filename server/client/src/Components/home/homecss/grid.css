@@ -1,0 +1,26 @@
+.row {
+    max-width: 100%;
+    margin: 0 auto; }
+    .row:not(:last-child) {
+      margin-bottom: 0rem; }
+    .row::after {
+      content: "";
+      display: table;
+      clear: both; }
+    .row [class^="col-"] {
+      float: left; }
+      .row [class^="col-"]:not(:last-child) {
+        margin-right: 0rem; }
+    .row .col-1-of-2 {
+      width: calc((100% - 0rem) /2); }
+    .row .col-1-of-3 {
+      width: calc((100% - 2*0rem) / 3); }
+    .row .col-2-of-3 {
+      width: calc(2 * ((100% - 2*0rem) / 3) + 0rem); }
+    .row .col-1-of-4 {
+      width: calc((100% - 3*0rem) / 4); }
+    .row .col-2-of-4 {
+      width: calc(2 * ((100% - 3*0rem) / 4) + 0rem); }
+    .row .col-3-of-4 {
+      width: calc(3 * ((100% - 3*0rem) / 4) + (2 * 0rem)); }
+  

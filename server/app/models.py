@@ -2,12 +2,16 @@ import base64
 from datetime import datetime, timedelta
 from hashlib import md5
 # i'm using the md5 for generating a unique identity for the avatars
-import os, json, jwt
+import os, json
 from time import time
 from flask import current_app, url_for
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import db, login, search
+from app import db, login
+from itsdangerous import (  TimedJSONWebSignatureSerializer as Serializer,
+                            BadSignature,
+                            SignatureExpired )
+
 
 '''Recheck the implementation of the database schema: all relationships in here
 now are one to one. Association table for the relationship between either three
@@ -42,8 +46,25 @@ class TokenMixin(object):
             return None
         return user
 
+    def getPasswordResetToken(self):
+        s = Serializer( current_app.config['SECRET_KEY'], expires_in=600)
+        return s.dumps({'id': self.id})
+
+    @staticmethod
+    def verifyPasswordResetToken(token):
+        s = Serializer( current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except SignatureExpired:
+            return None
+        except BadSignature:
+            return None
+        
+        user = User.query.get(data['id'])
+        return user
+
 class User(UserMixin, TokenMixin, db.Model):
-    __searchable__ = ['institution', 'department']
+    __searchable__ = ['username', 'inistitution', 'department']
     id = db.Column(db.Integer, primary_key=True)
     firstname = db.Column(db.String(32))
     lastname = db.Column(db.String(32))
@@ -53,6 +74,7 @@ class User(UserMixin, TokenMixin, db.Model):
     email = db.Column(db.String(128), index=True, unique=True, nullable=False)
     pwhash = db.Column(db.String(128))
     projects = db.relationship('Project', backref='author', lazy='dynamic')
+
 
     def __repr__(self):
         return '<user:{} name:{} {}>'.format(self.username, self.firstname, self.lastname)
@@ -123,18 +145,19 @@ def load_user(id):
     #return Lecturer.query.get(int(id)) or Student.query.get(int(id))
 
 class Project(db.Model):
-    __searchable__ = ['title', 'authors', 'publish_date']
+    __searchable__ = ['title', 'authors', 'publish_date', 'tags', 'author.institution', 'author.department']
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(128), index=True)
-    authors = db.Column(db.String(250))
-    #approved = db.Column(db.Boolean, default=False)
+    authors = db.Column(db.Text, index=True)
+    tags = db.Column(db.Text, index=True)
     submit_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    publish_date= db.Column(db.DateTime, index=True)
     file_data= db.Column(db.LargeBinary)
     filename = db.Column(db.String(120), unique=True)
-    owner = db.Column(db.Integer, db.ForeignKey('student.id'))
-    supervisor = db.Column(db.Integer, db.ForeignKey('lecturer.id'))
+    owner = db.Column(db.Integer, db.ForeignKey('user.id'))
+    publish_date= db.Column(db.DateTime, index=True)
+    #approved = db.Column(db.Boolean, default=False)
+    #supervisor = db.Column(db.Integer, db.ForeignKey('lecturer.id'))
     #requested_approval = db.Column(db.Boolean, default=False)
     #approval_req_accepted = db.Column(db.Boolean, default=False)
 

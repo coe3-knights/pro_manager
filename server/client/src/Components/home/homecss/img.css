@@ -1,0 +1,98 @@
+.hero{
+    height: 86vh;
+    background-image: linear-gradient(
+        to left bottom,
+        rgba(0, 0, 0, 0.3)
+        , rgba(0, 0, 0, .8))
+        , url(./3.jpg);
+    background-size: cover;
+    z-index: 0;
+    /* clip-path: polygon(0 0,0% 5%, 100% 0%, 100% 100%, 10% 100%, 0% 100%, 10% 0%); */
+}
+
+.right{
+    background-color: #eee;height: 86vh;
+    clip-path: polygon(0 0, 100% 0, 90% 100%,100% 90%, 0 100%);
+    z-index: 0;
+}
+
+.rightside{
+    margin-top: 14rem;
+    /* text-align: center; */
+}
+
+.primary_txt1,
+.primary_txt2{
+    text-transform: uppercase;
+    text-align: center;
+    font-family: inherit;
+}
+
+.primary_txt1{
+    display: block;
+    font-size: 9.5rem;
+    letter-spacing: 3.6rem;
+    font-weight: 400;
+    margin-bottom: .5rem;
+}
+
+.primary_txt2{
+    display: block;
+    font-size: 3.2rem;
+    letter-spacing: 1.1rem;
+    font-weight: 400;
+    margin-bottom: 1rem;
+}
+
+.rightside p{
+    letter-spacing: .1rem;
+    word-spacing: .1rem;
+    font-size: 1.7rem;
+    line-break: loose;
+    font-weight: 400;
+    margin-left: 5rem;
+}
+
+.rightside p span{
+    display: flex;
+    justify-content: center;
+    line-height: 2rem;
+}
+
+.getstartedbox{
+    text-align: center;
+    margin-top: 8rem;
+    padding-bottom: 3rem;
+}
+
+.getstarted{
+    position: relative;
+    text-transform: uppercase;
+    font-weight: 400;
+    letter-spacing: .02rem;
+    background-color: #3381b8;
+    padding: 1.3rem 4rem;
+    box-shadow: 0 .6rem .6rem -.6rem rgba(0, 0, 0, 0.7);
+    border-radius: 6px;
+    transition: all .4s;
+    width: 20rem;
+    left: 22rem;
+
+}
+
+.social{
+    display: flex;
+    position: absolute;
+    top: 88%;
+    left: 1.4rem;
+}
+
+.social li{
+    font-size: 2rem;
+    padding: 1rem;
+    background-color: transparent;
+    margin: 1rem;
+    border-radius: 10%;
+    transition: all .4s;
+    font-weight: 900;
+}

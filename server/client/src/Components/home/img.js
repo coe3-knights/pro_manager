@@ -3,7 +3,7 @@ import {Link} from '@reach/router'
 import './homecss/img.css'
 import './homecss/grid.css'
 
-const Social=()=>{
+export const Social=()=>{
     let list = ['ion-social-whatsapp-outline what','ion-social-twitter-outline twit','ion-social-skype-outline skyp','ion-social-googleplus-outline goog']
   
     return(

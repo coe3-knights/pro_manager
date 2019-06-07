@@ -1,5 +1,5 @@
 import React from 'react';
-import  {NavLink} from 'react-router-dom'
+//import  {NavLink} from 'react-router-dom'
 //import styled from 'styled-components';
 
 class SideBar extends React.Component{
@@ -30,7 +30,7 @@ class SideBar extends React.Component{
                 let names = list[i].split(' ')[1]
                 let name = list[i].split(' ')[2]
                 return(
-                  <NavLink to={`/${name}`}>
+                 // <NavLink to={`/${name}`}>
                     <li
                      style={this.state.selectedElement===item? 
                         {backgroundColor: 'green'}
@@ -41,7 +41,7 @@ class SideBar extends React.Component{
                     >
                      <span className='pops'>{names}</span>
                     </li>
-                  </NavLink>
+                  //</NavLink>
                 )
             })}
           </ul>

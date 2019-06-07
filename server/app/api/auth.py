@@ -1,7 +1,7 @@
-from flask import g
+from flask import g, jsonify
 from flask_login import current_user
 from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
-from app.models import Lecturer, Student
+from app.models import User
 from app.api.errors import errorResponse
 
 basic_auth = HTTPBasicAuth()
@@ -9,11 +9,11 @@ token_auth = HTTPTokenAuth()
 
 @basic_auth.verify_password
 def verify_password(username, password):
-    user = Lecturer.query.filter_by(username=username).first() or Student.query.filter_by(username=username).first()
+    user = User.query.filter_by(username=username).first()
     if user is None:
         return False
     g.current_user = user
-    return user.checkPassword(password)
+    return user.verify_password_from_db(password)
 
 @basic_auth.error_handler
 def basicAuthError():
@@ -22,9 +22,12 @@ def basicAuthError():
 
 @token_auth.verify_token
 def verify_token(token):
-    g.current_user = Lecturer.checkToken(token) or Student.checkToken(token) if token else None
+    g.current_user = User.verify_auth_token(token)
     return g.current_user is not None
 
 @token_auth.error_handler
-def tokenAuthError():
-    return errorResponse(401)
+def unauthorized_token():
+    response = jsonify({'status': 401, 'error': 'unauthorized',
+                        'message': 'please send your authentication token'})
+    response.status_code = 401
+    return response

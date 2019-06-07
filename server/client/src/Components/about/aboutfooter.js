@@ -1,6 +1,6 @@
 import React from 'react'
 import './aboutcss/about.css'
-import { Social } from '../home/img'
+import {Social}  from '../home/img'
 
 const Footer = () => {
     return(

@@ -11,9 +11,9 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     PROJECTS_PER_PAGE = 10
     WHOOSH_BASE = os.path.join(basedir, 'whoosh_base')
-    MAIL_SERVER = os.environ.get('MAIL_SERVER')  or 'smtp.googlemail.com'
-    MAIL_PORT = int(os.environ.get('MAIL_PORT') or 25)
+    MAIL_SERVER = 'smtp.gmail.com'
+    MAIL_PORT = 587
     MAIL_USE_TLS = True
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME') or 'knights.of.coe3'
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') or 'coe3solutionarchitects'
-    ADMINS = ['knights.of.coe3@google.com']
+    MAIL_USERNAME = 'knights.of.coe3@gmail.com'
+    MAIL_PASSWORD = 'coe3solutionarchitects'
+    ADMINS = ['knights.of.coe3@gmail.com']

@@ -5,7 +5,7 @@ import Fpassword from './Components/Login/Fpassword'
 import {Router} from '@reach/router';
 import Home from './Components/home'
 import Header from './Components/home/header'
-import Openproject from './Components/openproject/background'
+//import Openproject from './Components/openproject/background'
 import About from './Components/about/about'
 import './index.css';
 import './style.css'
@@ -20,7 +20,6 @@ class App extends Component {
           <Login path = "login" />
           <Fpassword path = "fpassword" />
           <Signup path = "signup" />
-          <Openproject path = "openprojects" />
           <About path = "about" />
         </Router>
 

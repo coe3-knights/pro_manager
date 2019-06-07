@@ -3,7 +3,7 @@ from app import db
 from app.models import User, Project
 from app.api import api
 from app.api.auth import token_auth,basic_auth
-from app.api.errors import badRequest
+from app.api.errors import badRequest, errorResponse
 from werkzeug.security import check_password_hash
 from flask_login import login_user, current_user, logout_user
 from app.api.email import sendPaswordRequest
@@ -16,7 +16,7 @@ def login():
       try:
          login_data = request.get_json()
       except:
-            return jsonify({'message' : 'No details provided'})
+            return badRequest('no details provided')
 
       login_data = request.get_json()
       email = login_data.get('email')
@@ -24,7 +24,7 @@ def login():
       user = User.query.filter_by(email=email).first()
 
       if not user:
-           return jsonify({'message' : 'no user exists with such email'})
+           return badRequest('no user exists with such email')
               
       if check_password_hash(user.pwhash,password):
             token = user.generate_auth_token() 
@@ -47,7 +47,7 @@ def createUser():
       try:
          new_user = request.get_json() 
       except:
-            return jsonify({'message' : 'No details provided'}) 
+            return badRequest('no details provided')
       
       if 'username' not in new_user or 'email' not in new_user or 'password' not in new_user:
           return badRequest('no username, password or email')      
@@ -74,16 +74,16 @@ def createUser():
 def updateUser(username):
     student = User.query.filter_by(username=username).first()
     if student is None:
-         return jsonify({'message':'user does not exist'})
+         return badRequest('user does not exist')
 
     if request.method == 'POST':
             try:
                 data = request.get_json() 
             except:
-                  return jsonify({'message' : 'No details provided'})  
+                  return badRequest('no details provided') 
 
             if current_user.username != student.username:
-                return jsonify({'message' : 'You cannot perfom this action'})
+                return errorResponse(403, 'You cannot perform this action')
 
             if data:
               for key in data:
@@ -105,7 +105,7 @@ def updateUser(username):
 def deleteUser(username):
     user = User.query.filter_by(username=username).first()
     if user != current_user:
-       return jsonify({'message' : 'you cannot perform this function'})
+       return errorResponse(403, 'You cannot perform this action')
 
     db.session.delete(user)
     db.session.commit()
@@ -120,7 +120,7 @@ def requestPasswordReset():
     try:
         req_data = request.get_json()
     except:
-        return jsonify({'message' : 'No details provided'})
+        return badRequest('no details provided') 
 
     if 'email' not in req_data:
         return badRequest('user email required')
@@ -130,7 +130,7 @@ def requestPasswordReset():
          sendPaswordRequest(user)
          return jsonify({'message' : 'please check your email'})
       except:
-         return jsonify({'message' : 'mail not sent'})
+         return errorResponse(502, 'mail not sent')
     return badRequest('email not registered')
 
 
@@ -144,11 +144,11 @@ def resetPassword(token):
     try:
         new_password = request.get_json['new_password']
     except:
-        return jsonify({'message' : 'No details provided'})
+        return badRequest('no details provided') 
 
     user.setResetPassword(new_password)
     db.session.commit()
-    return 201
+    return jsonify({'message', 'reset success'}), 200
 
 
 
@@ -158,20 +158,13 @@ def resetPassword(token):
 def getUserUploads(username):
       student = User.query.filter_by(username=username).first()
       if student is None:
-          return jsonify({'message':'user does not exist'})
+          return badRequest('user does not exist') 
 
       if current_user.username != student.username:
-          return jsonify({'message' : 'You cannot perfom this action'})
+          return errorResponse(403, 'You cannot perform this action')
 
       user = User.query.filter_by(username=username).first_or_404()
       payload = Project.query.filter_by(author=user)\
           .order_by(Project.submit_date.desc())
 
       return jsonify(payload)
-
-
-
-
-@api.route('/student/<string:username>/projects/search')
-def ssearch(username):
-    pass

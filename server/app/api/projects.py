@@ -34,6 +34,9 @@ def explore():
 def getProjectInfo(filename):
     project = Project.query.filter_by(filename=filename).first()
 
+    if project is None:
+        return errorResponse(404, 'resource does not exist')
+
     project_data = {}
     project_data['title'] = project.title
     project_data['authors'] = project.authors
@@ -46,18 +49,24 @@ def getProjectInfo(filename):
 
 
 @api.route('/projects/upload', methods=['POST'])
-#@token_auth.login_required
+@token_auth.login_required
 def upload():
     if 'input_file' not in request.files:
         return badRequest('no input file')
     file = request.files['input_file']
     
     if Project.allowed_file(file.filename):
-        if request.form.get('project_title') is None:
-            return badRequest('project title missing')
+
+        errors = []
+        for field in ['project_title', 'authors']:
+            if request.form.get(field) is None:
+                errors.append(f"{field} field missing in request") 
+        if errors != []:
+            return badRequest(errors)
+        
         filename = secure_filename(file.filename)   
         new_project = Project()
-        new_project.owner =  1
+        new_project.owner =  current_user.id
         new_project.authors = request.form.get('authors')
         new_project.title = request.form.get('project_title')
         new_project.hashFilename(filename)
@@ -65,6 +74,7 @@ def upload():
         db.session.add(new_project)
         db.session.commit()
         return jsonify('upload success'), 201
+    
     return errorResponse(415, 'upload a .pdf file!')
     
 
@@ -72,6 +82,10 @@ def upload():
 @token_auth.login_required
 def download(filename):
     project = Project.query.filter_by(filename=filename).first()
+
+    if project is None:
+        return errorResponse(404, 'resource does not exist')
+
     return send_file(BytesIO(project.file_data), mimetype='application/pdf', attachment_filename=project.title+'.pdf', as_attachment=True)
 
 @api.route('/projects/search')
@@ -104,6 +118,10 @@ def search():
 @token_auth.login_required
 def deleteProject(filename):
     project = Project.query.filter_by(filename=filename).first()
+
+    if project is None:
+        return errorResponse(404, 'resource does not exist')
+    
     db.session.delete(project)
     db.session.commit()
     return jsonify({'message':'delete success'})

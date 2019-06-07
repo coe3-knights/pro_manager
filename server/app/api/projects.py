@@ -79,12 +79,13 @@ def search():
     q = request.args.get('q')
     projects = Project.query.whoosh_search(q).all()
     users = User.query.whoosh_search(q).all()
-    if projects or users is None:
-        return jsonify({'message' : 'No project uploaded yet!'})
-    
+  
     for user in users:
         for project in user.projects:
             projects.append(project)
+            
+    if projects is None:
+         return jsonify({'message' : 'No project uploaded yet!'})
 
     output = []
     for project in projects:

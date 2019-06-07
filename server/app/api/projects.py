@@ -1,74 +1,108 @@
-from flask import jsonify, request, send_file, url_for
+from flask import jsonify, request, send_file, url_for, current_app
 from io import BytesIO
 from app import db
-from app.models import Project
-from app.api import bp
+from app.models import Project, User
+from app.api import api
 from app.api.auth import token_auth
-from app.api.errors import badRequest
+from app.api.errors import badRequest, errorResponse
 from flask_login import current_user
+from werkzeug.utils import secure_filename
 
 
-@bp.route('/explore', methods=['GET', 'POST'])
+@api.route('/projects', methods=['GET'])
 def explore():
-    pass
+    projects = Project.query.order_by(Project.submit_date.desc()).all()
+
+    if projects is None:
+        return jsonify({'message' : 'No project uploaded yet!'})
+
+    output = []
+    for project in projects:
+        project_data = {}
+        project_data['title'] = project.title
+        project_data['authors'] = project.authors
+        project_data['filename'] = project.filename
+        project_data['size'] = len(project.file_data)
+        project_data['submit_date'] = project.submit_date
+        output.append(project_data)
+
+    return jsonify(output)    
+       
 
 
-@bp.route('/projects/<int:id>')
-def getProjectInfo(id):
-    project = Project.query.get_or_404(id).first()
+@api.route('/projects/<string:filename>')
+def getProjectInfo(filename):
+    project = Project.query.filter_by(filename=filename).first()
 
-    if current_user.is_authenticated and current_user==project.author:
-        response = jsonify(project.toDict(public=False))
-        response.status_code = 200
-        return response
+    project_data = {}
+    project_data['title'] = project.title
+    project_data['authors'] = project.authors
+    project_data['filename'] = project.filename
+    project_data['size'] = len(project.file_data)
+    project_data['submit_date'] = project.submit_date
 
-    response = jsonify(project.toDict())
-    response.status_code = 200
-    return response
+    return jsonify(project_data)
 
 
 
-@bp.route('/projects/upload', methods=['POST'])
-@token_auth.login_required
-def upload(response):
+@api.route('/projects/upload', methods=['POST'])
+#@token_auth.login_required
+def upload():
+    if 'input_file' not in request.files:
+        return badRequest('no input file')
     file = request.files['input_file']
-
-    new_project = Project()
-    new_project.owner = current_user.id
-    new_project.title = request.forms.get('project_title')
-    if new_project.title == None:
-        new_project.title = file.filename.split('.',1)[0]
-    new_project.hashFilename(file.filename)
-    new_project.file_data = file.read()
-
-    db.session.add(new_project)
-    db.session.commit()
-    #response = jsonify(new_project.toDict(public=False))
-    response.status_code = 201
-    response.headers['Location'] = url_for('api.getProjectInfo', id=new_project.id)
-    return response
+    
+    if Project.allowed_file(file.filename):
+        if request.form.get('project_title') is None:
+            return badRequest('project title missing')
+        filename = secure_filename(file.filename)   
+        new_project = Project()
+        new_project.owner =  1
+        new_project.authors = request.form.get('authors')
+        new_project.title = request.form.get('project_title')
+        new_project.hashFilename(filename)
+        new_project.file_data = file.read()
+        db.session.add(new_project)
+        db.session.commit()
+        return jsonify('upload success'), 201
+    return errorResponse(415, 'upload a .pdf file!')
     
 
-@bp.route('/projects/download/<string:filename>')
+@api.route('/projects/download/<string:filename>')
 @token_auth.login_required
 def download(filename):
     project = Project.query.filter_by(filename=filename).first()
-    return send_file(project.file_data, mimetype='application/pdf', attachment_filename=project.title+'.pdf', as_attachment=True)
+    return send_file(BytesIO(project.file_data), mimetype='application/pdf', attachment_filename=project.title+'.pdf', as_attachment=True)
 
-
-@bp.route('/projects/request_approval', methods=['PUT'])
-@token_auth.login_required
-def requestApproval():
-    pass
-
+@api.route('/projects/search')
+def search():
+    q = request.args.get('q')
+    projects = Project.query.whoosh_search(q).all()
+    users = User.query.whoosh_search(q).all()
+    if projects or users is None:
+        return jsonify({'message' : 'No project uploaded yet!'})
     
-@bp.route('/projects/accept_approval_request', methods=['POST'])
-@token_auth.login_required
-def acceptApprovalRequest():
-    pass
+    for user in users:
+        for project in user.projects:
+            projects.append(project)
+
+    output = []
+    for project in projects:
+        project_data = {}
+        project_data['title'] = project.title
+        project_data['authors'] = project.authors
+        project_data['filename'] = project.filename
+        project_data['size'] = len(project.file_data)
+        project_data['submit_date'] = project.submit_date
+        output.append(project_data)
+
+    return jsonify(output)
 
 
-@bp.route('/projects/delete_project/<string:filename>', methods=['DELETE'])
+@api.route('/projects=/<string:filename>', methods=['DELETE'])
 @token_auth.login_required
 def deleteProject(filename):
-    pass
+    project = Project.query.filter_by(filename=filename).first()
+    db.session.delete(project)
+    db.session.commit()
+    return jsonify({'message':'delete success'})

@@ -1,207 +1,138 @@
-import base64
-from datetime import datetime, timedelta
-from hashlib import md5
-# i'm using the md5 for generating a unique identity for the avatars
+from datetime import datetime,timedelta
 import os, json, jwt
+from hashlib import md5
 from time import time
-from flask import current_app, url_for
+from flask import current_app, url_for, jsonify
+from werkzeug.utils import secure_filename
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import db, login
+from app import db, login_manager
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
-'''Recheck the implementation of the database schema: all relationships in here
-now are one to one. Association table for the relationship between either three
-models have not been created yet. This is because I have not received any of your
-schemas yet and I do not want to veto on which one we should use. Feel free to
-edit this current model and push to the branch I have created for this situation's
-pull request. Please, ensure that you do not push to the main branch as this might
-cause inconsistency on our various machines. Read the Flask_sqlalchemy documentation
-(version 2.3) if you do not understand anything in this code.
-'''
 
-class TokenMixin(object):
-    token = db.Column(db.String(32), index=True, unique=True)
-    token_expiration_date = db.Column(db.DateTime)
+@login_manager.user_loader
+def load_user(id):
+    return User.query.get(int(id))
 
-    def getToken(self, expires_in=3600):
-        now = datetime.utcnow()
-        if self.token and self.token_expiration_date > now + timedelta(seconds=60):
-            return self.token
-        self.token = base64.b64encode(os.urandom(24)).decode('utf-8')
-        self.token_expiration_date = now + timedelta(seconds=expires_in)
-        db.session.add(self)
-        return self.token
 
-    def revokeToken(self):
-        self.token_expiration_date = datetime.utcnow() - timedelta(seconds=1)
+class User(db.Model,UserMixin):
+    __searchable__ = ['institution','department','programme','username']
 
-    @staticmethod
-    def checkToken(token):
-        user = Lecturer.query.filter_by(token=token).first() or Student.query.filter_by(token=token).first()
-        if user is None or user.token_expiration_date < datetime.utcnow():
-            return None
-        return user
-
-class User(UserMixin, object):
     id = db.Column(db.Integer, primary_key=True)
-    firstname = db.Column(db.String(32))
-    lastname = db.Column(db.String(32))
-    username = db.Column(db.String(64), index=True, unique=True, nullable=False)
-    institution = db.Column(db.String(64))
-    department = db.Column(db.String(64))
-    email = db.Column(db.String(128), index=True, unique=True, nullable=False)
+    firstname = db.Column(db.String(32),nullable=False)
+    lastname = db.Column(db.String(32),nullable=False)
+    username = db.Column(db.String(32),nullable=False)
+    email = db.Column(db.String(128), unique=True, nullable=False)
     pwhash = db.Column(db.String(128))
+    institution = db.Column(db.String(120),nullable=False, index=True)
+    department = db.Column(db.String(64),nullable=False, index=True)
+    programme = db.Column(db.String(64),nullable=False, index=True)
+    registered_on = db.Column(db.DateTime, nullable=False) 
+    projects = db.relationship('Project', backref='author', lazy='dynamic')
 
-    def __repr__(self):
-        return '<user:{} name:{} {}>'.format(self.username, self.firstname, self.lastname)
 
-    def setPassword(self, password):
+    def __init__(self,firstname, lastname, username, email, password, institution, department, programme):
+        self.firstname = firstname
+        self.lastname = lastname
+        self.username = username
+        self.email = email
+        self.pwhash = generate_password_hash(password)
+        self.institution = institution
+        self.department = department
+        self.programme = programme
+        self.registered_on = datetime.utcnow()
+
+
+    def verify_password_from_db(self, password):
+        return check_password_hash(self.password_hash, password)
+
+
+    def setResetPassword(self,password):
         self.pwhash = generate_password_hash(password)
 
-    def checkPassword(self, password):
-        return check_password_hash(self.pwhash, password)
+        
 
-    # This function retrieves an avatar for users using their emails. These 
-    # avatars will be used as user profile pictures. It has been redacted for now,
-    # pending approval from group members.
-    #
-    # def avatar(self, size):
-    #     digest = md5(self.email.lower().encode('utf-8')).hexdigest()
-    #     return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
-    #         digest, size)    
-    
+    def save(self):
+        """
+        Persist the user in the database
+        """
+        db.session.add(self)
+        db.session.commit()
 
-    def toDict(self, inc_email=False):
-        data = {
-            'id': self.id,
-            'username': self.username,
-            'firstname': self.firstname,
-            'lastname': self.lastname,
-            'institution': self.institution,
-            'department': self.department,
-            #'avatar': self.avatar(128)
-        }
-        if inc_email:
-            data['email'] = self.email
-        return data
+        return self
 
-    def fromDict(self, data, new_user=False):
-        for field in ['username', 'email', 'firstname', 'lastname', 'school',
-                'department']:
-            if field in data:
-                setattr(self, field, data[field])
-        if new_user and 'password' in data:
-            self.setPassword(data['password'])
 
-class Lecturer(User, UserMixin, TokenMixin, db.Model):
-    projects = db.relationship('Project', backref='inspector', lazy='dynamic')
-    #include columns for lecturer validation
+    def generate_auth_token(self, expires_in=3600):
+        """
+        generate user specific token to authenticate requests for 1hr
+        """
+        try:
+            payload = {
+                'exp': datetime.utcnow() + timedelta(seconds=expires_in),
+                'iat': datetime.utcnow(),
+                'sub': self.id
+            }
 
-    def lecturerToDict(self, include_email=False):
-        data = self.toDict(include_email)
-        data['projects_count'] = self.projects.count()
-        return data
+            return jwt.encode(
+                    payload,
+                    current_app.config['SECRET_KEY'],
+                    algorithm='HS256'
+                ).decode('UTF-8')
+        except Exception as e:
+            return e
 
-class Student(User, UserMixin, TokenMixin, db.Model):
-    projects = db.relationship('Project', backref='author', lazy='dynamic')
-    #check with frontend guys to see if there are other info particular to students
 
-    def studentToDict(self, include_email=False):
-        data = self.toDict(include_email)
-        data['projects_count'] = self.projects.count()
+        
 
-'''Remember to include a projects_list part in the *ToDict functions after defining 
- a toDict function to handle projects. The list should be a dict of all projects submitted or supervised by a user.
-'''
+    @staticmethod
+    def verify_auth_token(token):
+        """
+        Decoding the token to get the payload and then return the user
+        """
+        try:
+            payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms='HS256')
+            user = User.query.filter_by(id=payload['sub']).first()
+            return user
+        except :
+            return None
 
-@login.user_loader
-def load_user(id):
-    return Lecturer.query.get(int(id)) or Student.query.get(int(id))
+
+
+
+    def getPasswordResetToken(self):
+            s = Serializer( current_app.config['SECRET_KEY'], expires_in=600)
+            return s.dumps({'id': self.id})
+
+    @staticmethod
+    def verifyPasswordResetToken(token):
+        s = Serializer( current_app.config['SECRET_KEY'])
+        try:
+            data_id = s.loads(token)['id']
+        except:
+            return None
+        
+        user = User.query.get(data_id)
+        return user        
+
+
+
 
 class Project(db.Model):
+    __searchable__ = ['title','authors']
+
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(128), index=True)
-    approved = db.Column(db.Boolean, default=False)
-    submit_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    publish_date= db.Column(db.DateTime, index=True)
+    title = db.Column(db.String(128), nullable=False, index=True)
+    authors = db.Column(db.Text, nullable=False, index=True)
+    submit_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     file_data= db.Column(db.LargeBinary)
-    filename = db.Column(db.String(120), unique=True)
-    owner = db.Column(db.Integer, db.ForeignKey('student.id'))
-    supervisor = db.Column(db.Integer, db.ForeignKey('lecturer.id'))
-    requested_approval = db.Column(db.Boolean, default=False)
-    approval_req_accepted = db.Column(db.Boolean, default=False)
-
-    def __repr__(self):
-        return '<{}>'.format(self.title)
-    
-
-    # Remove these methods from here and implement them appropriately in their respective view modules.
-    #
-    # def approve(self):
-    #     self.approved = True
-    #     self.publish_date = datetime.utcnow
-    #
-    # def requestApproval(self):
-    #     self.requested_approval = True
-    #     '''return true
-    #     remember to uncomment this return statement when implementing logic to
-    #     ensure an approval request is submitted once'''
-    #
-    # def acceptApprovalRequest(self):
-    #     self.approval_req_accepted = True
-    #
-    # def isPendingApproval(self):
-    #     if self.requested_approval and not self.approval_req_accepted:
-    #         return True
-    #     return False
+    filename = db.Column(db.String(120), unique=True,nullable=False)
+    modified_at = db.Column(db.DateTime)
+    owner = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def hashFilename(self, filename):
-        digest = md5(filename.lower().encode('utf-8')).hexdigest()
+        digest = md5((filename.lower()+str(datetime.utcnow())).encode('utf-8')).hexdigest()
         self.filename = digest
 
-    def toDict(self, public=True):
-        data = {
-            'id': self.id,
-            'title': self.title,
-            'date_published': self.publish_date, 
-            'author_id': self.owner,
-            'author': self.author
-        }
-        if not public:
-            data['date_submitted'] = self.submit_date
-            data['supervisor_id'] = self.supervisor
-            data['supervisor'] = self.inspector
-        return data
-
-    # The static method below will pass a specified no. of projects per page into a 
-    # dictionary that will be passed into a json response object for the allowed 
-    # routes. Resturcture the '_links' property to suite the requirements from the 
-    # frontenders.
-    # Nonetheless, I have commented the block out since I was looking at another 
-    # implementation where we leave the pagination to the client-side, thus 
-    # returning anything from the database that matches the query in the response 
-    # object on the very first request
-    #
-    # @staticmethod
-    # def to_collection_dict(query, page, per_page, endpoint, **kwargs):
-    #     resources = query.paginate(page, per_page, False)
-    #     data = {
-    #         'projects': [project.to_dict() for project in resources.projects],
-    #         '_meta': {
-    #             'page': page,
-    #             'per_page': per_page,
-    #             'total_pages': resources.pages,
-    #             'total_items': resources.total
-    #         },
-    #         '_links': {
-    #             'self': url_for(endpoint, page=page, per_page=per_page,
-    #                             **kwargs),
-    #             'next': url_for(endpoint, page=page + 1, per_page=per_page,
-    #                             **kwargs) if resources.has_next else None,
-    #             'prev': url_for(endpoint, page=page - 1, per_page=per_page,
-    #                             **kwargs) if resources.has_prev else None
-    #         }
-    #     }
-    #     return data
-            
-    
+    @staticmethod
+    def allowed_file(filename):
+        return '.' in filename and filename.rsplit('.', 1)[1].lower()=='pdf'

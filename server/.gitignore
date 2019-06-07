@@ -1,8 +1,5 @@
-*.pyc
-*.pyo
-*/__pycache__
 venv
+__pycache__*
 .vscode
 app.db
-logs
-todo.txt
+*.py[cod]

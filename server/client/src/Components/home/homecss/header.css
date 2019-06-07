@@ -1,0 +1,109 @@
+.header{
+    position: relative;
+    top: 0rem;
+    height: 7rem;
+    display: flex;
+    background-color: #ddd;
+    border-bottom: .1rem dashed #3381b8;
+    z-index: 999;
+}
+
+
+.login{
+    position: absolute;
+    right: 8rem;
+    top: 0.1rem;
+    border-left: .1rem solid #555;
+    transition: all .4s;
+}
+
+.login li,
+.about li{
+    text-transform: capitalize;
+    cursor: pointer;
+    letter-spacing: .02rem;
+    border-right: .1rem solid #555;
+    color: #3381b8;
+}
+.login li{padding: 2.5rem 4rem;}
+
+.about{
+    position: absolute;
+    left: 40%;
+    top: 0.1rem;
+    transform: translate(-50%, 0);
+    transition: all .4s;
+}
+
+.about li{
+    display: inline-block;
+    padding: 2.5rem 2rem;
+    background-color: transparent;
+    transition: all .4s;
+    backface-visibility: hidden;
+    /* box-shadow:  0 .6rem .6rem -.6rem rgba(0, 0, 0, 0.6); */
+}
+.about ul:nth-child(1){
+    border-left: .1rem solid #555;
+}
+
+.search{
+    position: absolute;
+    right: 20%;
+    top: 2.1rem;
+}
+
+.searchlable{
+    position: absolute;
+    top: 3rem;
+    left: 1rem;
+    font-size: 1.4rem;
+    transition: all .4s;
+}
+
+.searchicon{
+    position: absolute;
+    left: 90.1%;
+    top: .04rem;
+    padding: .41rem .4rem;
+    cursor: pointer;
+    transition: all .4s;
+}
+
+.search a{
+    color: #555;
+    /* background-color: #3381b8; */
+}
+
+input:placeholder-shown ~ label{
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-4rem);
+}
+
+.logocontainer{
+    position: absolute;
+    left: 4rem;
+    top: .5rem;
+    height: 6rem;
+    width: 6rem;
+    border-radius: 50%;
+    background-image: url(./6.jpg);
+    background-size: cover;
+    transition: all .2s;
+    cursor: pointer;
+}
+
+.logocaption{
+    font-weight: 600;
+    font-size: 1.9rem;
+    margin-left: 6rem;
+    margin-top: 1.7rem;
+    color: #555;
+}
+
+/* .active{
+    font-weight: bold;
+    color: #3381b8;
+    background-color: #ddd;
+} */

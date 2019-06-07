@@ -1,0 +1,124 @@
+.main-wrapper{
+    position: relative;
+    width: 35vw;
+    height: 89vh;
+    left: 60vw;
+    top: 6.5rem;
+    /* border: 1px solid #000 */
+}
+
+.forms-wrapper{
+    position: relative;
+    top: 15rem;
+    height: 68vh;
+    width: 30vw;
+    /* border: 1px solid red; */
+    left: 4rem;
+}
+
+.wrap{
+    position: absolute;
+    left: 8.5rem;
+}
+.signtext{
+    position: absolute;
+    top: -15rem;
+    left: 7rem;;
+}
+
+.signtext span{
+    display: flex;
+    justify-content: center;
+}
+
+#text{
+    position: absolute;
+    left: 8rem;
+    top: -7rem;
+}
+
+.username{
+    position: absolute;
+    width: 42rem;
+    left: 1rem;
+}
+
+.person{
+    position: absolute;
+    left: 41.7rem;
+    top: .5rem;
+}
+
+.password{
+    position: absolute;
+    left: 1rem;
+    width: 40rem;
+}
+
+.details{
+    position: absolute;
+    top: 10rem;
+    left: 21rem;
+    font-size: 1.4rem;
+}
+
+.checkbox{
+    position: absolute;
+    left: -20rem;
+}
+
+#rem{
+    position: absolute;
+    left: -17rem;
+
+}
+
+#rem-text{
+    position: absolute;
+    color: rgba(0, 0, 0, 0.733);
+    left: 12rem;
+}
+.btns{
+    position: absolute;
+    width: 25vw;
+    height: 10vh;
+    /* border: 1px solid green; */
+    top: 15rem;
+    left: 3.5rem;
+}
+
+button{
+    border-radius: 0rem;
+    padding: 1.3rem;
+    width: 15rem;
+    font-weight: 500;
+    font-size: 1.5rem;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    border: 1px solid #000;
+}
+.submit1{
+    /* background-color: rgba(128, 0, 128, 0.822); */
+    position: absolute;
+    top: 0rem;
+    left: 0rem;
+    color: #fff;
+    margin-right: 2rem;
+}
+
+.submit2{
+    position: absolute;
+    top: 0rem;
+    left: 23.2rem;
+   color: #fff;
+}
+
+#term{
+    position: absolute;
+    left: 8rem;
+    color: #000;
+    top: rem;
+    font-weight: 300;
+    font-size: 1.4rem
+}

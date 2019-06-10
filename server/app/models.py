@@ -128,6 +128,7 @@ class Project(db.Model):
     filename = db.Column(db.String(120), unique=True,nullable=False)
     modified_at = db.Column(db.DateTime)
     owner = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    pdf_page_count = db.Column(db.Integer)
 
     def hashFilename(self, filename):
         digest = md5((filename.lower()+str(datetime.utcnow())).encode('utf-8')).hexdigest()

@@ -71,6 +71,7 @@ def upload():
         new_project.title = request.form.get('project_title')
         new_project.hashFilename(filename)
         new_project.file_data = file.read()
+        new_project.pdf_page_count = request.form.get('pdf_page_count')
         db.session.add(new_project)
         db.session.commit()
         return jsonify('upload success'), 201

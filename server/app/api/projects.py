@@ -23,7 +23,9 @@ def explore():
         project_data['authors'] = project.authors
         project_data['filename'] = project.filename
         project_data['size'] = len(project.file_data)
-        project_data['submit_date'] = project.submit_date
+        project_data['date_created'] = project.date_created
+        project_data['supervisor'] = project.supervisor
+        project_data['tags'] = project.tags
         output.append(project_data)
 
     return jsonify(output)    
@@ -42,7 +44,7 @@ def getProjectInfo(filename):
     project_data['authors'] = project.authors
     project_data['filename'] = project.filename
     project_data['size'] = len(project.file_data)
-    project_data['submit_date'] = project.submit_date
+    project_data['date_created'] = project.date_created
 
     return jsonify(project_data)
 
